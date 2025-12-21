@@ -243,6 +243,7 @@
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1ZG1xaXdzc2xka3V6eWplYnp0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjI5NzU2OCwiZXhwIjoyMDgxODczNTY4fQ.zMSxQ7TiNEX_SHhVhKqJ8iO7f9L5Dk0TWf4BXTBNXh8";
 
     async function loadDevices() {
+      // 查询设备表
       const res = await fetch(`${SUPABASE_URL}/rest/v1/devices?select=*&order=created_at.desc`, {
         headers: {
           "apikey": SUPABASE_KEY,
@@ -250,6 +251,26 @@
         }
       });
       const devices = await res.json();
+      
+      // 查询运行状态表
+      const statusRes = await fetch(`${SUPABASE_URL}/rest/v1/device_status?select=*`, {
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`
+        }
+      });
+      const statusList = await statusRes.json();
+      const statusMap = {};
+      (statusList || []).forEach(s => { statusMap[s.device_id] = s; });
+      
+      // 合并数据
+      devices.forEach(d => {
+        const s = statusMap[d.device_id];
+        if (s) {
+          d.is_running = s.is_running;
+          d.last_active = s.last_active;
+        }
+      });
       
       const pending = devices.filter(d => d.status === "pending");
       const approved = devices.filter(d => d.status === "approved");
