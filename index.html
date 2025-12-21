@@ -240,7 +240,7 @@
   <script>
     const SUPABASE_URL = "https://yudmqiwssldkuzyjebzt.supabase.co";
     // 使用 service_role key（管理员密钥，可绑过 RLS）
-    const SUPABASE_KEY = "sb_secret_yi-CPArveiud3elDNobbtQ_61SwXOwZ";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1ZG1xaXdzc2xka3V6eWplYnp0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjI5NzU2OCwiZXhwIjoyMDgxODczNTY4fQ.zMSxQ7TiNEX_SHhVhKqJ8iO7f9L5Dk0TWf4BXTBNXh8";
 
     async function loadDevices() {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/devices?select=*&order=created_at.desc`, {
