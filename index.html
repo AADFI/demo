@@ -13,6 +13,51 @@
       min-height: 100vh;
       padding: 20px;
     }
+    .login-screen {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #0a0a0c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .login-screen.hidden { display: none; }
+    .login-box {
+      background: #141418;
+      border: 1px solid #2a2a32;
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+      width: 90%;
+      max-width: 320px;
+    }
+    .login-box h2 { margin-bottom: 8px; font-size: 20px; }
+    .login-box p { color: #71717a; font-size: 13px; margin-bottom: 20px; }
+    .login-box input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #2a2a32;
+      border-radius: 8px;
+      background: #0a0a0c;
+      color: #f4f4f5;
+      font-size: 16px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .login-box button {
+      width: 100%;
+      padding: 12px;
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .login-error { color: #ef4444; font-size: 13px; margin-top: 12px; display: none; }
+    .main-content { display: none; }
+    .main-content.visible { display: block; }
     .header {
       text-align: center;
       margin-bottom: 24px;
@@ -146,6 +191,18 @@
   </style>
 </head>
 <body>
+  <!-- 密码登录界面 -->
+  <div class="login-screen" id="login-screen">
+    <div class="login-box">
+      <h2>管理员验证</h2>
+      <p>请输入管理密码</p>
+      <input type="password" id="admin-password" placeholder="密码">
+      <button onclick="checkPassword()">进入</button>
+      <div class="login-error" id="login-error">密码错误</div>
+    </div>
+  </div>
+
+  <div class="main-content" id="main-content">
   <div class="header">
     <h1>KiroTools 设备管理</h1>
     <p>在手机上管理设备授权</p>
@@ -178,10 +235,12 @@
       <div class="loading">加载中...</div>
     </div>
   </div>
+  </div><!-- 关闭 main-content -->
 
   <script>
     const SUPABASE_URL = "https://yudmqiwssldkuzyjebzt.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1ZG1xaXdzc2xka3V6eWplYnp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYyOTc1NjgsImV4cCI6MjA4MTg3MzU2OH0.ofH_JXK1xQ_zljLXnVPjTDU4YKnr2qJIhQ8EYaU1afA";
+    // 使用 service_role key（管理员密钥，可绑过 RLS）
+    const SUPABASE_KEY = "sb_secret_yi-CPArveiud3elDNobbtQ_61SwXOwZ";
 
     async function loadDevices() {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/devices?select=*&order=created_at.desc`, {
@@ -258,11 +317,27 @@
       loadDevices();
     }
 
-    // 初始加载
-    loadDevices();
+    // 密码验证（修改这里的密码）
+    const ADMIN_PASSWORD = "QinLin1219";
     
-    // 每10秒自动刷新
-    setInterval(loadDevices, 10000);
+    function checkPassword() {
+      const input = document.getElementById("admin-password").value;
+      const error = document.getElementById("login-error");
+      
+      if (input === ADMIN_PASSWORD) {
+        document.getElementById("login-screen").classList.add("hidden");
+        document.getElementById("main-content").classList.add("visible");
+        loadDevices();
+        setInterval(loadDevices, 10000);
+      } else {
+        error.style.display = "block";
+      }
+    }
+    
+    // 回车键提交
+    document.getElementById("admin-password").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") checkPassword();
+    });
   </script>
 </body>
 </html>
