@@ -217,11 +217,18 @@
       outline: none;
       transform: none !important;
     }
-    .refresh-btn:active {
+    .refresh-btn:active,
+    .refresh-btn:focus,
+    .refresh-btn:hover {
+      width: 140px !important;
+      height: 48px !important;
+      min-height: 48px !important;
+      max-height: 48px !important;
+      line-height: 48px;
+      padding: 0;
       opacity: 0.8;
-    }
-    .refresh-btn:focus {
       outline: none;
+      transform: none !important;
     }
     .refresh-btn.loading {
       pointer-events: none;
