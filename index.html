@@ -2,192 +2,430 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>KiroTools 设备管理</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --bg: #0a0a0c;
+      --surface: #141418;
+      --surface2: #1c1c22;
+      --border: #2a2a32;
+      --text: #f4f4f5;
+      --text2: #a1a1aa;
+      --text3: #71717a;
+      --primary: #6366f1;
+      --primary-glow: rgba(99, 102, 241, 0.25);
+      --success: #22c55e;
+      --success-glow: rgba(34, 197, 94, 0.2);
+      --danger: #ef4444;
+      --danger-glow: rgba(239, 68, 68, 0.2);
+      --warning: #fbbf24;
+      --warning-glow: rgba(251, 191, 36, 0.2);
+    }
+    
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #0a0a0c;
-      color: #f4f4f5;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
-      padding: 20px;
+      line-height: 1.5;
     }
+    
+    /* ===== 登录界面 ===== */
     .login-screen {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: #0a0a0c;
+      background: var(--bg);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 9999;
+      padding: 20px;
     }
     .login-screen.hidden { display: none; }
+    
     .login-box {
-      background: #141418;
-      border: 1px solid #2a2a32;
-      border-radius: 16px;
-      padding: 32px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 32px;
       text-align: center;
-      width: 90%;
-      max-width: 320px;
-    }
-    .login-box h2 { margin-bottom: 8px; font-size: 20px; }
-    .login-box p { color: #71717a; font-size: 13px; margin-bottom: 20px; }
-    .login-box input {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #2a2a32;
-      border-radius: 8px;
-      background: #0a0a0c;
-      color: #f4f4f5;
-      font-size: 16px;
+      max-width: 360px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+    
+    .login-icon {
+      width: 72px; height: 72px;
+      margin: 0 auto 24px;
+      background: linear-gradient(135deg, var(--primary), #818cf8);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 32px var(--primary-glow);
+    }
+    .login-icon svg {
+      width: 36px; height: 36px;
+      stroke: #fff;
+      fill: none;
+      stroke-width: 1.5;
+    }
+    
+    .login-box h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .login-box p {
+      color: var(--text3);
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+    
+    .input-group {
       margin-bottom: 16px;
-      text-align: center;
     }
-    .login-box button {
+    .input-group input {
       width: 100%;
-      padding: 12px;
-      background: #6366f1;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+    .input-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+    .input-group input::placeholder {
+      color: var(--text3);
+    }
+    
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--primary), #818cf8);
       color: #fff;
       border: none;
-      border-radius: 8px;
-      font-size: 14px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
       cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 16px var(--primary-glow);
     }
-    .login-error { color: #ef4444; font-size: 13px; margin-top: 12px; display: none; }
+    .login-btn:active {
+      transform: scale(0.98);
+    }
+    
+    .login-error {
+      color: var(--danger);
+      font-size: 13px;
+      margin-top: 16px;
+      padding: 10px;
+      background: var(--danger-glow);
+      border-radius: 8px;
+      display: none;
+    }
+    
+    /* ===== 主内容 ===== */
     .main-content { display: none; }
     .main-content.visible { display: block; }
+    
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      padding-bottom: 100px;
+    }
+    
+    /* Header */
     .header {
       text-align: center;
-      margin-bottom: 24px;
+      padding: 20px 0 24px;
+      position: relative;
+    }
+    .header-icon {
+      width: 56px; height: 56px;
+      margin: 0 auto 16px;
+      background: linear-gradient(135deg, #18181b, #09090b);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
+    }
+    .header-icon span {
+      font-size: 24px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #0ea5e9, #6366f1, #a855f7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
     .header h1 {
-      font-size: 24px;
-      margin-bottom: 8px;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
     }
     .header p {
-      color: #71717a;
+      color: var(--text3);
       font-size: 14px;
     }
+    
+    /* Refresh Button */
     .refresh-btn {
-      background: #6366f1;
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--primary), #818cf8);
       color: #fff;
       border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
+      padding: 14px 32px;
+      border-radius: 50px;
       font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
-      margin: 16px 0;
-    }
-    .refresh-btn:active {
-      background: #4f46e5;
-    }
-    .section {
-      margin-bottom: 24px;
-    }
-    .section-title {
-      font-size: 14px;
-      color: #71717a;
-      margin-bottom: 12px;
       display: flex;
       align-items: center;
       gap: 8px;
+      box-shadow: 0 8px 32px var(--primary-glow);
+      z-index: 100;
+      transition: all 0.2s;
     }
-    .section-title .count {
-      background: #6366f1;
-      color: #fff;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 12px;
+    .refresh-btn:active {
+      transform: translateX(-50%) scale(0.95);
     }
-    .device-card {
-      background: #141418;
-      border: 1px solid #2a2a32;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 12px;
+    .refresh-btn svg {
+      width: 18px; height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
     }
-    .device-header {
+    .refresh-btn.loading svg {
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* Section */
+    .section {
+      margin-bottom: 24px;
+    }
+    .section-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       margin-bottom: 12px;
+      padding: 0 4px;
     }
-    .device-id {
-      font-family: 'SF Mono', Monaco, monospace;
-      font-size: 18px;
+    .section-title {
+      font-size: 13px;
       font-weight: 600;
-      color: #6366f1;
-      letter-spacing: 1px;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-    .device-status {
+    .section-count {
+      background: var(--surface2);
+      color: var(--text3);
       padding: 4px 10px;
       border-radius: 12px;
       font-size: 12px;
-      font-weight: 500;
+      font-weight: 600;
     }
-    .device-status.pending {
-      background: rgba(251, 191, 36, 0.2);
-      color: #fbbf24;
-    }
-    .device-status.approved {
-      background: rgba(34, 197, 94, 0.2);
-      color: #22c55e;
-    }
-    .device-status.rejected {
-      background: rgba(239, 68, 68, 0.2);
-      color: #ef4444;
-    }
-    .device-info {
-      font-size: 13px;
-      color: #a1a1aa;
+    .section-count.pending { background: var(--warning-glow); color: var(--warning); }
+    .section-count.approved { background: var(--success-glow); color: var(--success); }
+    .section-count.rejected { background: var(--danger-glow); color: var(--danger); }
+    
+    /* Device Card */
+    .device-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
       margin-bottom: 12px;
+      transition: all 0.2s;
     }
-    .device-info div {
+    .device-card:active {
+      transform: scale(0.99);
+    }
+    
+    .device-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+    .device-id-wrap {
+      flex: 1;
+    }
+    .device-id {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 1px;
       margin-bottom: 4px;
     }
+    .device-name {
+      font-size: 13px;
+      color: var(--text2);
+    }
+    
+    .device-status {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .device-status.pending {
+      background: var(--warning-glow);
+      color: var(--warning);
+    }
+    .device-status.approved {
+      background: var(--success-glow);
+      color: var(--success);
+    }
+    .device-status.rejected {
+      background: var(--danger-glow);
+      color: var(--danger);
+    }
+    
+    .device-meta {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .meta-item {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .meta-label {
+      font-size: 10px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 4px;
+    }
+    .meta-value {
+      font-size: 13px;
+      color: var(--text);
+      font-weight: 500;
+    }
+    .meta-item.running .meta-value {
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .meta-item.running .meta-value::before {
+      content: '';
+      width: 8px; height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    
     .device-actions {
       display: flex;
       gap: 10px;
     }
     .btn {
       flex: 1;
-      padding: 10px;
+      padding: 12px;
       border: none;
-      border-radius: 8px;
+      border-radius: 12px;
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn:active {
+      transform: scale(0.97);
+    }
+    .btn svg {
+      width: 16px; height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
     }
     .btn-approve {
-      background: #22c55e;
+      background: var(--success);
       color: #fff;
-    }
-    .btn-approve:active {
-      background: #16a34a;
+      box-shadow: 0 4px 12px var(--success-glow);
     }
     .btn-reject {
-      background: #ef4444;
-      color: #fff;
+      background: var(--surface2);
+      color: var(--text2);
+      border: 1px solid var(--border);
     }
     .btn-reject:active {
-      background: #dc2626;
+      background: var(--danger);
+      color: #fff;
+      border-color: var(--danger);
     }
     .btn-revoke {
-      background: #71717a;
-      color: #fff;
+      background: var(--surface2);
+      color: var(--text2);
+      border: 1px solid var(--border);
     }
+    .btn-delete {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+    
     .empty {
       text-align: center;
-      color: #71717a;
-      padding: 40px;
+      color: var(--text3);
+      padding: 40px 20px;
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: 16px;
+      font-size: 14px;
     }
+    .empty svg {
+      width: 40px; height: 40px;
+      stroke: var(--text3);
+      fill: none;
+      stroke-width: 1.5;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+    
     .loading {
       text-align: center;
-      color: #71717a;
+      color: var(--text3);
       padding: 40px;
+      font-size: 14px;
+    }
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-left: 8px;
+      vertical-align: middle;
     }
   </style>
 </head>
@@ -195,59 +433,76 @@
   <!-- 登录界面 -->
   <div class="login-screen" id="login-screen">
     <div class="login-box">
+      <div class="login-icon">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
       <h2>管理员登录</h2>
       <p>使用 Supabase 账号登录</p>
-      <input type="email" id="admin-email" placeholder="邮箱">
-      <input type="password" id="admin-password" placeholder="密码">
-      <button onclick="login()">登录</button>
+      <div class="input-group">
+        <input type="email" id="admin-email" placeholder="邮箱地址">
+      </div>
+      <div class="input-group">
+        <input type="password" id="admin-password" placeholder="密码">
+      </div>
+      <button class="login-btn" onclick="login()">登录</button>
       <div class="login-error" id="login-error">登录失败</div>
     </div>
   </div>
 
   <div class="main-content" id="main-content">
-  <div class="header">
-    <h1>KiroTools 设备管理</h1>
-    <p>在手机上管理设备授权</p>
-    <button class="refresh-btn" onclick="loadDevices()">刷新列表</button>
-  </div>
+    <div class="container">
+      <div class="header">
+        <div class="header-icon"><span>K</span></div>
+        <h1>设备管理</h1>
+        <p>管理 KiroTools 设备授权</p>
+      </div>
 
-  <div class="section">
-    <div class="section-title">
-      待授权 <span class="count" id="pending-count">0</span>
-    </div>
-    <div id="pending-list">
-      <div class="loading">加载中...</div>
-    </div>
-  </div>
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">待授权</span>
+          <span class="section-count pending" id="pending-count">0</span>
+        </div>
+        <div id="pending-list">
+          <div class="loading">加载中</div>
+        </div>
+      </div>
 
-  <div class="section">
-    <div class="section-title">
-      已授权 <span class="count" id="approved-count">0</span>
-    </div>
-    <div id="approved-list">
-      <div class="loading">加载中...</div>
-    </div>
-  </div>
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">已授权</span>
+          <span class="section-count approved" id="approved-count">0</span>
+        </div>
+        <div id="approved-list">
+          <div class="loading">加载中</div>
+        </div>
+      </div>
 
-  <div class="section">
-    <div class="section-title">
-      已拒绝 <span class="count" id="rejected-count">0</span>
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">已拒绝</span>
+          <span class="section-count rejected" id="rejected-count">0</span>
+        </div>
+        <div id="rejected-list">
+          <div class="loading">加载中</div>
+        </div>
+      </div>
     </div>
-    <div id="rejected-list">
-      <div class="loading">加载中...</div>
-    </div>
+
+    <button class="refresh-btn" id="refresh-btn" onclick="loadDevices()">
+      <svg viewBox="0 0 24 24"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+      刷新列表
+    </button>
   </div>
-  </div><!-- 关闭 main-content -->
 
   <script>
     const SUPABASE_URL = "https://yudmqiwssldkuzyjebzt.supabase.co";
-    // 使用 anon key（公开的，通过 RLS 控制权限）
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1ZG1xaXdzc2xka3V6eWplYnp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYyOTc1NjgsImV4cCI6MjA4MTg3MzU2OH0.ofH_JXK1xQ_zljLXnVPjTDU4YKnr2qJIhQ8EYaU1afA";
     
-    // 初始化 Supabase 客户端
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
-    // 获取当前认证 headers
     async function getAuthHeaders() {
       const { data: { session } } = await sb.auth.getSession();
       if (!session) throw new Error("未登录");
@@ -259,21 +514,21 @@
     }
 
     async function loadDevices() {
+      const btn = document.getElementById("refresh-btn");
+      btn.classList.add("loading");
+      
       try {
         const headers = await getAuthHeaders();
         
-        // 查询设备表
         const res = await fetch(`${SUPABASE_URL}/rest/v1/devices?select=*&order=created_at.desc`, { headers });
         if (!res.ok) throw new Error("加载失败");
         const devices = await res.json();
         
-        // 查询运行状态表
         const statusRes = await fetch(`${SUPABASE_URL}/rest/v1/device_status?select=*`, { headers });
         const statusList = statusRes.ok ? await statusRes.json() : [];
         const statusMap = {};
         (statusList || []).forEach(s => { statusMap[s.device_id] = s; });
         
-        // 合并数据
         devices.forEach(d => {
           const s = statusMap[d.device_id];
           if (s) {
@@ -295,45 +550,96 @@
         renderList("rejected-list", rejected, "rejected");
       } catch (e) {
         console.error("加载设备失败:", e);
+      } finally {
+        btn.classList.remove("loading");
       }
     }
 
     function renderList(containerId, devices, status) {
       const container = document.getElementById(containerId);
       if (devices.length === 0) {
-        container.innerHTML = '<div class="empty">暂无设备</div>';
+        container.innerHTML = `
+          <div class="empty">
+            <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><circle cx="6" cy="6" r="1.5" fill="currentColor"/><circle cx="6" cy="18" r="1.5" fill="currentColor"/></svg>
+            <div>暂无设备</div>
+          </div>`;
         return;
       }
       
       container.innerHTML = devices.map(d => `
         <div class="device-card">
           <div class="device-header">
-            <span class="device-id">${d.device_id}</span>
+            <div class="device-id-wrap">
+              <div class="device-id">${d.device_id}</div>
+              <div class="device-name">${d.device_name || "未知设备"}</div>
+            </div>
             <span class="device-status ${d.status}">${
               d.status === "pending" ? "待授权" :
               d.status === "approved" ? "已授权" : "已拒绝"
             }</span>
           </div>
-          <div class="device-info">
-            <div>设备: ${d.device_name || "未知"}</div>
-            <div>系统: ${d.os_info || "未知"}</div>
-            <div>时间: ${new Date(d.created_at).toLocaleString()}</div>
-            ${d.is_running ? '<div style="color:#22c55e">● 服务运行中</div>' : ''}
-            ${d.last_active ? '<div>最后活跃: ' + new Date(d.last_active).toLocaleString() + '</div>' : ''}
+          <div class="device-meta">
+            <div class="meta-item">
+              <div class="meta-label">操作系统</div>
+              <div class="meta-value">${d.os_info || "未知"}</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">注册时间</div>
+              <div class="meta-value">${formatTime(d.created_at)}</div>
+            </div>
+            ${d.is_running ? `
+              <div class="meta-item running">
+                <div class="meta-label">状态</div>
+                <div class="meta-value">运行中</div>
+              </div>
+            ` : ''}
+            ${d.last_active ? `
+              <div class="meta-item">
+                <div class="meta-label">最后活跃</div>
+                <div class="meta-value">${formatTime(d.last_active)}</div>
+              </div>
+            ` : ''}
           </div>
           <div class="device-actions">
             ${status === "pending" ? `
-              <button class="btn btn-approve" onclick="updateStatus('${d.device_id}', 'approved')">批准</button>
-              <button class="btn btn-reject" onclick="updateStatus('${d.device_id}', 'rejected')">拒绝</button>
+              <button class="btn btn-approve" onclick="updateStatus('${d.device_id}', 'approved')">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                批准
+              </button>
+              <button class="btn btn-reject" onclick="updateStatus('${d.device_id}', 'rejected')">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                拒绝
+              </button>
             ` : status === "approved" ? `
-              <button class="btn btn-revoke" onclick="updateStatus('${d.device_id}', 'rejected')">撤销授权</button>
+              <button class="btn btn-revoke" onclick="updateStatus('${d.device_id}', 'rejected')">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                撤销授权
+              </button>
             ` : `
-              <button class="btn btn-approve" onclick="updateStatus('${d.device_id}', 'approved')">重新授权</button>
-              <button class="btn btn-reject" onclick="deleteDevice('${d.device_id}')">删除</button>
+              <button class="btn btn-approve" onclick="updateStatus('${d.device_id}', 'approved')">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                重新授权
+              </button>
+              <button class="btn btn-delete" onclick="deleteDevice('${d.device_id}')">
+                <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                删除
+              </button>
             `}
           </div>
         </div>
       `).join("");
+    }
+    
+    function formatTime(isoString) {
+      const d = new Date(isoString);
+      const now = new Date();
+      const diff = now - d;
+      
+      if (diff < 60000) return "刚刚";
+      if (diff < 3600000) return Math.floor(diff / 60000) + " 分钟前";
+      if (diff < 86400000) return Math.floor(diff / 3600000) + " 小时前";
+      
+      return d.toLocaleDateString("zh-CN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
     }
 
     async function updateStatus(deviceId, status) {
@@ -372,20 +678,14 @@
       }
     }
 
-    // Supabase Auth 登录
     async function login() {
       const email = document.getElementById("admin-email").value;
       const password = document.getElementById("admin-password").value;
       const error = document.getElementById("login-error");
       
       try {
-        const { data, error: authError } = await sb.auth.signInWithPassword({
-          email,
-          password
-        });
-        
+        const { data, error: authError } = await sb.auth.signInWithPassword({ email, password });
         if (authError) throw authError;
-        
         showMain();
       } catch (e) {
         error.textContent = e.message || "登录失败";
@@ -400,16 +700,12 @@
       setInterval(loadDevices, 10000);
     }
     
-    // 检查是否已有会话
     async function checkSession() {
       const { data: { session } } = await sb.auth.getSession();
-      if (session) {
-        showMain();
-      }
+      if (session) showMain();
     }
     checkSession();
     
-    // 回车键提交
     document.getElementById("admin-password").addEventListener("keypress", (e) => {
       if (e.key === "Enter") login();
     });
