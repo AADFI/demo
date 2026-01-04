@@ -316,6 +316,7 @@
           </div>
           <div class="device-info">
             <div>设备: ${d.device_name || "未知"}</div>
+            <div>系统: ${d.os_info || "未知"}</div>
             <div>时间: ${new Date(d.created_at).toLocaleString()}</div>
             ${d.is_running ? '<div style="color:#22c55e">● 服务运行中</div>' : ''}
             ${d.last_active ? '<div>最后活跃: ' + new Date(d.last_active).toLocaleString() + '</div>' : ''}
