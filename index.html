@@ -218,11 +218,6 @@
       transform: none !important;
       letter-spacing: 1px;
     }
-    .refresh-btn::before {
-      content: '↻';
-      margin-right: 6px;
-      font-size: 16px;
-    }
     .refresh-btn:active,
     .refresh-btn:focus,
     .refresh-btn:hover {
@@ -241,11 +236,7 @@
       pointer-events: none;
       opacity: 0.7;
     }
-    .refresh-btn.loading::before {
-      animation: spin 1s linear infinite;
-      display: inline-block;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+
     
     /* Section */
     .section {
