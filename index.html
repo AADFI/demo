@@ -542,6 +542,7 @@
     async function loadDevices() {
       const btn = document.getElementById("refresh-btn");
       btn.classList.add("loading");
+      btn.textContent = "加载中...";
       
       try {
         const headers = await getAuthHeaders();
@@ -578,6 +579,7 @@
         console.error("加载设备失败:", e);
       } finally {
         btn.classList.remove("loading");
+        btn.textContent = "⟳ 刷新";
       }
     }
 
