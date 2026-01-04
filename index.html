@@ -197,7 +197,7 @@
       max-width: 140px !important;
       min-height: 48px !important;
       max-height: 48px !important;
-      background: var(--primary);
+      background: linear-gradient(135deg, var(--primary) 0%, #818cf8 100%);
       color: #fff;
       border: none;
       border-radius: 24px;
@@ -209,13 +209,19 @@
       margin-top: 0;
       margin-bottom: 0;
       cursor: pointer;
-      box-shadow: 0 4px 20px var(--primary-glow);
+      box-shadow: 0 6px 24px var(--primary-glow), 0 2px 8px rgba(0,0,0,0.2);
       z-index: 100;
       -webkit-tap-highlight-color: transparent;
       -webkit-appearance: none;
       appearance: none;
       outline: none;
       transform: none !important;
+      letter-spacing: 1px;
+    }
+    .refresh-btn::before {
+      content: '↻';
+      margin-right: 6px;
+      font-size: 16px;
     }
     .refresh-btn:active,
     .refresh-btn:focus,
@@ -226,14 +232,20 @@
       max-height: 48px !important;
       line-height: 48px;
       padding: 0;
-      opacity: 0.8;
+      opacity: 0.9;
       outline: none;
       transform: none !important;
+      box-shadow: 0 4px 16px var(--primary-glow);
     }
     .refresh-btn.loading {
       pointer-events: none;
       opacity: 0.7;
     }
+    .refresh-btn.loading::before {
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
     
     /* Section */
     .section {
