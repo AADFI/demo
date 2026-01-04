@@ -245,11 +245,11 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1ZG1xaXdzc2xka3V6eWplYnp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYyOTc1NjgsImV4cCI6MjA4MTg3MzU2OH0.ofH_JXK1xQ_zljLXnVPjTDU4YKnr2qJIhQ8EYaU1afA";
     
     // 初始化 Supabase 客户端
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     // 获取当前认证 headers
     async function getAuthHeaders() {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await sb.auth.getSession();
       if (!session) throw new Error("未登录");
       return {
         "apikey": SUPABASE_ANON_KEY,
@@ -378,7 +378,7 @@
       const error = document.getElementById("login-error");
       
       try {
-        const { data, error: authError } = await supabase.auth.signInWithPassword({
+        const { data, error: authError } = await sb.auth.signInWithPassword({
           email,
           password
         });
@@ -401,7 +401,7 @@
     
     // 检查是否已有会话
     async function checkSession() {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await sb.auth.getSession();
       if (session) {
         showMain();
       }
