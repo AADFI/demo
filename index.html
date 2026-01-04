@@ -559,8 +559,11 @@
         devices.forEach(d => {
           const s = statusMap[d.device_id];
           if (s) {
-            d.is_running = s.is_running;
             d.last_active = s.last_active;
+            // 最后活跃时间在5分钟内才算运行中
+            const lastActive = new Date(s.last_active);
+            const now = new Date();
+            d.is_running = (now - lastActive) < 5 * 60 * 1000;
           }
         });
         
