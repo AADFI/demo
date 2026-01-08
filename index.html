@@ -346,6 +346,10 @@
       background: var(--success-glow);
       color: var(--success);
     }
+    .btn-delete {
+      background: var(--danger);
+      color: #fff;
+    }
 
     .loading-spinner {
       text-align: center;
@@ -552,7 +556,11 @@
             ` : `
               <button class="btn btn-restore" onclick="updateStatus('${d.device_id}', 'approved')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-                恢复授权
+                恢复
+              </button>
+              <button class="btn btn-delete" onclick="deleteDevice('${d.device_id}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                删除
               </button>
             `}
           </div>
@@ -591,6 +599,21 @@
         loadDevices();
       } catch (e) {
         alert("操作失败: " + e.message);
+      }
+    }
+
+    async function deleteDevice(deviceId) {
+      if (!confirm("确定删除此设备？")) return;
+      try {
+        const headers = await getAuthHeaders();
+        // 删除 device_status
+        await fetch(`${SUPABASE_URL}/rest/v1/device_status?device_id=eq.${deviceId}`, { method: "DELETE", headers });
+        // 删除 devices
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/devices?device_id=eq.${deviceId}`, { method: "DELETE", headers });
+        if (!res.ok) throw new Error("删除失败");
+        loadDevices();
+      } catch (e) {
+        alert("删除失败: " + e.message);
       }
     }
 
