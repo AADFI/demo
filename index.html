@@ -623,8 +623,7 @@
                 <div class="meta-label">状态</div>
                 <div class="meta-value">运行中</div>
               </div>
-            ` : ''}
-            ${d.last_active ? `
+            ` : d.last_active ? `
               <div class="meta-item">
                 <div class="meta-label">最后活跃</div>
                 <div class="meta-value">${formatTime(d.last_active)}</div>
