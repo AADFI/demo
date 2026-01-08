@@ -453,9 +453,14 @@
           const s = statusMap[d.device_id];
           if (s) {
             d.last_active = s.last_active;
-            const lastActive = new Date(s.last_active);
-            const now = new Date();
-            d.is_running = (now - lastActive) < 5 * 60 * 1000;
+            // 优先使用 is_running 字段，如果为 true 还要检查 last_active 是否在 5 分钟内
+            if (s.is_running && s.last_active) {
+              const lastActive = new Date(s.last_active);
+              const now = new Date();
+              d.is_running = (now - lastActive) < 5 * 60 * 1000;
+            } else {
+              d.is_running = false;
+            }
           }
         });
 
